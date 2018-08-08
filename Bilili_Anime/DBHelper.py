@@ -1,8 +1,9 @@
 import pymssql
+import traceback
 
 class DBhelper:
     def __init__(self):
-        self.__conn = pymssql.connect(user='sa', password='*******', host='.', port=1433, database='DataAnalysis', charset="utf8")
+        self.__conn = pymssql.connect(user='sa', password='101WANGyu10', host='.', port=1433, database='DataAnalysis', charset="utf8")
         self.__cur = self.__conn.cursor()
 
     #table_name：表名
@@ -15,14 +16,20 @@ class DBhelper:
             str2 = str2 + "("
             for key in dict_data.keys():
                 str1 = str1 + key + ","
-                str2 = str2 +"'" + str(dict_data[key]) + "',";
+                str2 = str2 +"'" + str(dict_data[key]).replace("'","''") + "',";
             str1 = str1 + ")"
             str2 = str2 + ")"
             sql = str1.replace(",)",") ") + "values " + str2.replace(",)",")")
             self.__cur.execute(sql)
             self.__conn.commit()
-        except Exception:
-            Logger.write_log(sql+"\n")
+        except Exception as ex:
+            Logger.write_log(traceback.format_exc()+"\n")
+            Logger.write_log(sql+"\n\n")
+
+    def select_data(self,sql):
+        self.__cur.execute(sql)
+        return self.__cur.fetchall()
+
 
     def close_DB(self):
         self.__conn.close()
